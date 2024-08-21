@@ -28,7 +28,7 @@ func main() {
 	bookHandlers := web.NewBookHandlers(bookService)
 
 	// Verifica se o CLI foi chamado
-	if len(os.Args) > 1 && os.Args[1] == "search" {
+	if len(os.Args) > 1 && (os.Args[1] == "search" || os.Args[1] == "simulate"){
 		bookCLI := cli.NewBookCLI(bookService)
 		bookCLI.Run()
 		return

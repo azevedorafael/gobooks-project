@@ -1,6 +1,10 @@
 package service
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+	"time"
+)
 
 type Book struct {
 	ID int
@@ -100,4 +104,36 @@ func (s *BookService) SearchBooksByName(name string) ([]Book, error) {
 	}
 
 	return books, nil
+}
+
+// SimulateReading simula a leitura de um livro com base em um tempo de leitura.
+func (s *BookService) SimulateReading(bookID int, duration time.Duration, results chan<- string) {
+	book, err := s.GetBookByID(bookID)
+	if err != nil || book == nil {
+		results <- fmt.Sprintf("Livro com ID %d não encontrado.", bookID)
+		return
+	}
+
+	time.Sleep(duration) // Simula o tempo de leitura.
+	results <- fmt.Sprintf("Leitura do livro '%s' concluída!", book.Title)
+}
+
+// SimulateMultipleReadings simula a leitura de múltiplos livros simultaneamente.
+func (s *BookService) SimulateMultipleReadings(bookIDs []int, duration time.Duration) []string {
+	results := make(chan string, len(bookIDs)) // Canal com buffer para evitar bloqueio
+
+	// Lança as goroutines para simular a leitura.
+	for _, id := range bookIDs {
+		go func(bookID int) {
+			s.SimulateReading(bookID, duration, results)
+		}(id)
+	}
+
+	var responses []string
+	for range bookIDs {
+		responses = append(responses, <-results)
+	}
+	close(results) // Fechamento do canal após coleta de todos os resultados
+
+	return responses
 }
