@@ -10,12 +10,19 @@ import (
 	"gobooks/internal/service"
 	"gobooks/internal/web"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+  if err != nil {
+    log.Fatal("Error loading .env file")
+  }
+
+  mySQLURL := os.Getenv("MYSQL_URL")
 	// Conexão com o banco de dados SQLite3
-	db, err := sql.Open("sqlite3", "./books.db")
+	db, err := sql.Open("mysql", mySQLURL)
 	if err != nil {
 		log.Fatalf("failed to connect to the database: %v", err)
 	}
